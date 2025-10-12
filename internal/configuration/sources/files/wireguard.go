@@ -84,10 +84,19 @@ func parseWireguardPeerSection(peerSection *ini.Section) (
 	if endpoint != nil {
 		host, port, err := net.SplitHostPort(*endpoint)
 		if err == nil {
-			endpointIP = &host
 			endpointPort = &port
+			endpointIP = &host
+			addrs, lookupErr := net.LookupHost(host)
+			if lookupErr == nil && len(addrs) > 0 {
+				endpointIP = &addrs[0]
+			}
 		} else {
-			endpointIP = endpoint
+			addrs, lookupErr := net.LookupHost(*endpoint)
+			if lookupErr == nil && len(addrs) > 0 {
+				endpointIP = &addrs[0]
+			} else {
+				endpointIP = endpoint
+			}
 		}
 	}
 

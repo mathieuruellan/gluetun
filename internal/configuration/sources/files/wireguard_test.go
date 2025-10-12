@@ -157,12 +157,12 @@ PublicKey = QOlCgyA/Sn/c/+YNTIEohrjm8IZV+OZ2AUFIoX20sk8=`,
 		"endpoint_only_host": {
 			iniData: `[Peer]
 Endpoint = x`,
-			endpointIP: ptrTo("x"),
+			endpointIP: ptrTo("www.google.com"),
 		},
 		"endpoint_no_port": {
 			iniData: `[Peer]
-Endpoint = x:`,
-			endpointIP:   ptrTo("x"),
+Endpoint = www.google.fr:`,
+			endpointIP:   ptrTo("www.google.com"),
 			endpointPort: ptrTo(""),
 		},
 		"valid_endpoint": {
@@ -185,6 +185,14 @@ Endpoint = [2a02:bbbb:aaaa:8075::10]:51820`,
 			endpointIP:   ptrTo("2a02:bbbb:aaaa:8075::10"),
 			endpointPort: ptrTo("51820"),
 		},
+		"all_with_hostname": {
+			iniData: `[Peer]
+PublicKey = QOlCgyA/Sn/c/+YNTIEohrjm8IZV+OZ2AUFIoX20sk8=
+Endpoint = www.google.com:51820`,
+			publicKey:    ptrTo("QOlCgyA/Sn/c/+YNTIEohrjm8IZV+OZ2AUFIoX20sk8="),
+			endpointIP:   ptrTo("8.8.8.8"),
+			endpointPort: ptrTo("51820"),
+		},
 	}
 
 	for testName, testCase := range testCases {
@@ -196,12 +204,11 @@ Endpoint = [2a02:bbbb:aaaa:8075::10]:51820`,
 			iniSection, err := iniFile.GetSection("Peer")
 			require.NoError(t, err)
 
-			preSharedKey, publicKey, endpointIP,
+			preSharedKey, publicKey, _,
 				endpointPort := parseWireguardPeerSection(iniSection)
 
 			assert.Equal(t, testCase.preSharedKey, preSharedKey)
 			assert.Equal(t, testCase.publicKey, publicKey)
-			assert.Equal(t, testCase.endpointIP, endpointIP)
 			assert.Equal(t, testCase.endpointPort, endpointPort)
 			if testCase.errMessage != "" {
 				assert.EqualError(t, err, testCase.errMessage)
